@@ -133,7 +133,7 @@ The project includes automated deployment via GitHub Actions.
    - `SERVER_SSH_HOST` - Your server hostname or IP
    - `SERVER_SSH_LOGIN` - SSH username
    - `SERVER_SSH_PASSWORD` - SSH password
-   - `VITE_API_BASE_URL` - Backend API URL (e.g., `https://api.your-domain.com/api`)
+   - `VITE_API_BASE_URL` - Backend API URL (**MUST use https:// for HTTPS deployments**, e.g., `https://api.your-domain.com/api`)
    - `VITE_API_BEARER_TOKEN` - Backend API bearer token
 
 **Deploy:**
@@ -152,11 +152,16 @@ The workflow will:
 
 The following environment variables are required:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_BASE_URL` | Backend API base URL | `http://localhost:3002/api` |
-| `VITE_API_BEARER_TOKEN` | Bearer token for protected API endpoints | `your_secret_bearer_token_here` |
-| `VITE_APP_NAME` | Application name | `PTracker` |
+| Variable | Description | Example (Development) | Example (Production) |
+|----------|-------------|-----------------------|----------------------|
+| `VITE_API_BASE_URL` | Backend API base URL | `http://localhost:3002/api` | `https://api.yourdomain.com/api` |
+| `VITE_API_BEARER_TOKEN` | Bearer token for protected API endpoints | `your_secret_bearer_token_here` | `your_production_token` |
+| `VITE_APP_NAME` | Application name | `PTracker` | `PTracker` |
+
+**⚠️ IMPORTANT for Production:**
+- When deploying with HTTPS, you **must** use `https://` for `VITE_API_BASE_URL`
+- Using `http://` will cause Mixed Content errors and API requests will be blocked by the browser
+- Example error: `Mixed Content: The page at 'https://...' was loaded over HTTPS, but requested an insecure XMLHttpRequest endpoint 'http://...'`
 
 Copy `.env.example` to `.env` and update the values:
 
@@ -277,6 +282,14 @@ The application integrates with the PTracker backend API:
 - **State Management**: Redux Toolkit for auth state
 
 See [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md) for complete integration details.
+
+## Troubleshooting
+
+Having issues? Check the [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) for solutions to common problems including:
+- Mixed Content errors (CORS issues with HTTPS)
+- Authentication failures
+- Build and deployment issues
+- Backend connectivity problems
 
 ## UI Components
 
