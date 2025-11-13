@@ -38,6 +38,7 @@ A modern web application built with React, TypeScript, and React Router featurin
 ### Prerequisites
 
 - Node.js 18+ and npm
+- Docker and Docker Compose (for containerized deployment)
 
 ### Installation
 
@@ -55,7 +56,28 @@ npm run dev
 
 The application will be available at `http://localhost:5173/`
 
-### Build
+### Docker Deployment
+
+Run the application using Docker Compose:
+
+```bash
+# Build and start the container
+docker-compose up -d
+
+# Or using Docker directly
+docker build -t ptracker-web .
+docker run -p 3000:3000 ptracker-web
+```
+
+The application will be available at `http://localhost:3000/`
+
+To stop the container:
+
+```bash
+docker-compose down
+```
+
+## Building for Production
 
 ```bash
 # Build for production
