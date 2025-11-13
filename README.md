@@ -37,21 +37,21 @@ A modern web application built with React, TypeScript, and React Router featurin
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 18+ and yarn
 - Docker and Docker Compose (for containerized deployment)
 
 ### Installation
 
 ```bash
 # Install dependencies
-npm install
+yarn install
 ```
 
 ### Development
 
 ```bash
 # Start development server
-npm run dev
+yarn dev
 ```
 
 The application will be available at `http://localhost:5173/`
@@ -100,24 +100,24 @@ The workflow will:
 
 ```bash
 # Build for production
-npm run build
+yarn build
 ```
 
 ### Preview Production Build
 
 ```bash
 # Preview the production build locally
-npm run preview
+yarn preview
 ```
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
+- `yarn dev` - Start development server
+- `yarn build` - Build for production
+- `yarn preview` - Preview production build
+- `yarn lint` - Run ESLint
+- `yarn format` - Format code with Prettier
+- `yarn format:check` - Check code formatting
 
 ## Project Structure
 
