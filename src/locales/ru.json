@@ -1,0 +1,72 @@
+{
+  "translation": {
+    "auth": {
+      "login": "Войти",
+      "signup": "Регистрация",
+      "logout": "Выйти",
+      "email": "Email",
+      "password": "Пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "newPassword": "Новый пароль",
+      "forgotPassword": "Забыли пароль?",
+      "resetPassword": "Сброс пароля",
+      "verificationCode": "Код подтверждения",
+      "enterEmail": "Введите email для входа в ваш аккаунт",
+      "enterEmailSignup": "Введите email для создания аккаунта",
+      "enterCodeEmail": "Введите код подтверждения, отправленный на {{email}}",
+      "enterResetEmail": "Введите ваш email для получения кода восстановления пароля",
+      "enterCodeNewPassword": "Введите OTP, отправленный на ваш email, и новый пароль",
+      "sendOTP": "Отправить OTP",
+      "sendingOTP": "Отправка...",
+      "verifyEmail": "Подтвердите email",
+      "verifying": "Проверка...",
+      "resendCode": "Отправить код повторно",
+      "loggingIn": "Вход...",
+      "creatingAccount": "Создание аккаунта...",
+      "resetting": "Сброс...",
+      "createAccount": "Создать аккаунт",
+      "alreadyHaveAccount": "Уже есть аккаунт?",
+      "dontHaveAccount": "Нет аккаунта?",
+      "passwordResetSuccess": "Пароль успешно сброшен! Войдите с новым паролем.",
+      "cancel": "Отмена",
+      "back": "Назад",
+      "pleaseEnterCode": "Пожалуйста, введите 6-значный код подтверждения."
+    },
+    "home": {
+      "welcome": "Добро пожаловать в PTracker",
+      "welcomeBack": "С возвращением, {{email}}!",
+      "dashboard": "Панель управления",
+      "loading": "Загрузка информации о пользователе..."
+    },
+    "errors": {
+      "validationFailed": "Ошибка валидации. Проверьте введенные данные.",
+      "invalidCredentials": "Неверный email или пароль",
+      "userNotFound": "Пользователь не найден",
+      "userAlreadyExists": "Пользователь с таким email уже существует",
+      "emailAlreadyInUse": "Email уже используется",
+      "invalidResetCode": "Неверный код восстановления",
+      "resetCodeExpired": "Срок действия кода восстановления истек",
+      "resetCodeNotFound": "Код восстановления не найден",
+      "missingRequiredField": "Отсутствует обязательное поле",
+      "passwordsDoNotMatch": "Пароли не совпадают",
+      "passwordTooShort": "Пароль должен содержать не менее {{length}} символов",
+      "invalidEmail": "Неверный адрес email",
+      "invalidCode": "Введите корректный {{length}}-значный код",
+      "genericError": "Произошла ошибка. Попробуйте еще раз.",
+      "failedToSendOTP": "Не удалось отправить OTP. Попробуйте еще раз.",
+      "failedToCreateAccount": "Не удалось создать аккаунт. Попробуйте еще раз.",
+      "invalidOTP": "Неверный код подтверждения",
+      "failedToResetPassword": "Неверный OTP или не удалось сбросить пароль"
+    },
+    "validation": {
+      "emailRequired": "Email обязателен",
+      "emailInvalid": "Неверный формат email",
+      "passwordRequired": "Пароль обязателен",
+      "passwordTooShort": "Пароль должен содержать не менее 8 символов",
+      "confirmPasswordRequired": "Подтвердите пароль",
+      "passwordsMismatch": "Пароли не совпадают",
+      "codeRequired": "Код подтверждения обязателен",
+      "codeInvalid": "Код подтверждения должен содержать 6 цифр"
+    }
+  }
+}

@@ -1,10 +1,15 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { AuthProvider } from '@/contexts/AuthContext'
+import { useAppDispatch } from '@/hooks'
+import { initializeAuth } from '@/store/authSlice'
 
 export default function RootLayout() {
-  return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
-  )
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    // Initialize auth state from localStorage on app start
+    dispatch(initializeAuth())
+  }, [dispatch])
+
+  return <Outlet />
 }

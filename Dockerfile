@@ -12,6 +12,16 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
+# Build arguments for environment variables
+ARG VITE_API_BASE_URL
+ARG VITE_API_BEARER_TOKEN
+ARG VITE_APP_NAME
+
+# Set environment variables for build
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_API_BEARER_TOKEN=${VITE_API_BEARER_TOKEN}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+
 # Build the application
 RUN yarn build
 

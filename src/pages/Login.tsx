@@ -1,98 +1,93 @@
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
+import { useForm, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { useAppDispatch, useAppSelector } from '@/hooks'
+import { login, forgotPassword, resetPassword, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
+import { VALIDATION } from '@/constants'
+import { isValidEmail, isValidPassword, isValidCode, passwordsMatch } from '@/helpers'
+
+interface LoginFormData {
+  email: string
+  password: string
+}
+
+interface ForgotPasswordFormData {
+  email: string
+}
+
+interface ResetPasswordFormData {
+  code: string
+  newPassword: string
+  confirmPassword: string
+}
 
 export default function Login() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const { login, requestPasswordReset, resetPasswordWithOTP } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const dispatch = useAppDispatch()
+  const { isLoading, error } = useAppSelector((state) => state.auth)
+
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [showOTPInput, setShowOTPInput] = useState(false)
-  const [otp, setOtp] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [resetEmail, setResetEmail] = useState('')
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+  const {
+    register: registerLogin,
+    handleSubmit: handleLoginSubmit,
+    formState: { errors: loginErrors },
+  } = useForm<LoginFormData>()
 
-    try {
-      const success = await login(email, password)
-      if (success) {
-        navigate('/home')
-      } else {
-        setError('Invalid email or password')
-      }
-    } catch {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+  const {
+    register: registerForgot,
+    handleSubmit: handleForgotSubmit,
+    formState: { errors: forgotErrors },
+  } = useForm<ForgotPasswordFormData>()
+
+  const {
+    register: registerReset,
+    handleSubmit: handleResetSubmit,
+    control,
+    watch,
+    formState: { errors: resetErrors },
+  } = useForm<ResetPasswordFormData>()
+
+  const onLoginSubmit = async (data: LoginFormData) => {
+    dispatch(clearError())
+    const result = await dispatch(login(data))
+    if (login.fulfilled.match(result)) {
+      navigate('/home')
     }
   }
 
-  const handleForgotPassword = async (e: FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    try {
-      const success = await requestPasswordReset(resetEmail)
-      if (success) {
-        setShowOTPInput(true)
-      } else {
-        setError('Failed to send OTP. Please try again.')
-      }
-    } catch {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+  const onForgotPasswordSubmit = async (data: ForgotPasswordFormData) => {
+    dispatch(clearError())
+    setResetEmail(data.email)
+    const result = await dispatch(forgotPassword(data.email))
+    if (forgotPassword.fulfilled.match(result)) {
+      setShowOTPInput(true)
     }
   }
 
-  const handleResetPassword = async (e: FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const success = await resetPasswordWithOTP(resetEmail, otp, newPassword)
-      if (success) {
-        setShowForgotPassword(false)
-        setShowOTPInput(false)
-        setResetEmail('')
-        setOtp('')
-        setNewPassword('')
-        setConfirmPassword('')
-        setError('')
-        alert('Password reset successful! Please login with your new password.')
-      } else {
-        setError('Invalid OTP or failed to reset password')
-      }
-    } catch {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+  const onResetPasswordSubmit = async (data: ResetPasswordFormData) => {
+    dispatch(clearError())
+    const result = await dispatch(
+      resetPassword({
+        email: resetEmail,
+        code: data.code,
+        newPassword: data.newPassword,
+      })
+    )
+    if (resetPassword.fulfilled.match(result)) {
+      setShowForgotPassword(false)
+      setShowOTPInput(false)
+      setResetEmail('')
+      alert(t('auth.passwordResetSuccess'))
     }
   }
 
@@ -101,94 +96,122 @@ export default function Login() {
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Reset Password</CardTitle>
+            <CardTitle>{t('auth.resetPassword')}</CardTitle>
             <CardDescription>
-              {showOTPInput
-                ? 'Enter the OTP sent to your email and your new password'
-                : 'Enter your email address to receive a password reset code'}
+              {showOTPInput ? t('auth.enterCodeNewPassword') : t('auth.enterResetEmail')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {!showOTPInput ? (
-              <form onSubmit={handleForgotPassword} className="space-y-4">
+              <form onSubmit={handleForgotSubmit(onForgotPasswordSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="reset-email">Email</Label>
+                  <Label htmlFor="reset-email">{t('auth.email')}</Label>
                   <Input
                     id="reset-email"
                     type="email"
                     placeholder="m@example.com"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
+                    {...registerForgot('email', {
+                      required: t('validation.emailRequired'),
+                      validate: (value) => isValidEmail(value) || t('validation.emailInvalid'),
+                    })}
                   />
+                  {forgotErrors.email && (
+                    <p className="text-sm text-destructive">{forgotErrors.email.message}</p>
+                  )}
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <div className="flex gap-2">
-                  <Button type="submit" className="flex-1" disabled={loading}>
-                    {loading ? 'Sending...' : 'Send OTP'}
+                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                    {isLoading ? t('auth.sendingOTP') : t('auth.sendOTP')}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setShowForgotPassword(false)}
+                    onClick={() => {
+                      setShowForgotPassword(false)
+                      dispatch(clearError())
+                    }}
                   >
-                    Cancel
+                    {t('auth.cancel')}
                   </Button>
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleResetPassword} className="space-y-4">
+              <form onSubmit={handleResetSubmit(onResetPasswordSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="otp">Verification Code</Label>
+                  <Label htmlFor="code">{t('auth.verificationCode')}</Label>
                   <div className="flex justify-center">
-                    <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
+                    <Controller
+                      name="code"
+                      control={control}
+                      defaultValue=""
+                      rules={{
+                        required: t('validation.codeRequired'),
+                        validate: (value) =>
+                          isValidCode(value) || t('validation.codeInvalid'),
+                      }}
+                      render={({ field }) => (
+                        <InputOTP maxLength={VALIDATION.OTP_LENGTH} {...field}>
+                          <InputOTPGroup>
+                            {Array.from({ length: VALIDATION.OTP_LENGTH }).map((_, index) => (
+                              <InputOTPSlot key={index} index={index} />
+                            ))}
+                          </InputOTPGroup>
+                        </InputOTP>
+                      )}
+                    />
                   </div>
+                  {resetErrors.code && (
+                    <p className="text-sm text-destructive">{resetErrors.code.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
                   <Input
                     id="new-password"
                     type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
+                    {...registerReset('newPassword', {
+                      required: t('validation.passwordRequired'),
+                      validate: (value) =>
+                        isValidPassword(value) || t('validation.passwordTooShort'),
+                    })}
                   />
+                  {resetErrors.newPassword && (
+                    <p className="text-sm text-destructive">{resetErrors.newPassword.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password">{t('auth.confirmPassword')}</Label>
                   <Input
                     id="confirm-password"
                     type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
+                    {...registerReset('confirmPassword', {
+                      required: t('validation.confirmPasswordRequired'),
+                      validate: (value) =>
+                        passwordsMatch(value, watch('newPassword')) ||
+                        t('validation.passwordsMismatch'),
+                    })}
                   />
+                  {resetErrors.confirmPassword && (
+                    <p className="text-sm text-destructive">
+                      {resetErrors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <div className="flex gap-2">
-                  <Button type="submit" className="flex-1" disabled={loading}>
-                    {loading ? 'Resetting...' : 'Reset Password'}
+                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                    {isLoading ? t('auth.resetting') : t('auth.resetPassword')}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => {
                       setShowOTPInput(false)
-                      setOtp('')
-                      setNewPassword('')
-                      setConfirmPassword('')
+                      dispatch(clearError())
                     }}
                   >
-                    Back
+                    {t('auth.back')}
                   </Button>
                 </div>
               </form>
@@ -203,50 +226,60 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardTitle>{t('auth.login')}</CardTitle>
+          <CardDescription>{t('auth.enterEmail')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...registerLogin('email', {
+                  required: t('validation.emailRequired'),
+                  validate: (value) => isValidEmail(value) || t('validation.emailInvalid'),
+                })}
               />
+              {loginErrors.email && (
+                <p className="text-sm text-destructive">{loginErrors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <button
                   type="button"
-                  onClick={() => setShowForgotPassword(true)}
+                  onClick={() => {
+                    setShowForgotPassword(true)
+                    dispatch(clearError())
+                  }}
                   className="text-sm underline"
                 >
-                  Forgot your password?
+                  {t('auth.forgotPassword')}
                 </button>
               </div>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...registerLogin('password', {
+                  required: t('validation.passwordRequired'),
+                })}
               />
+              {loginErrors.password && (
+                <p className="text-sm text-destructive">{loginErrors.password.message}</p>
+              )}
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? t('auth.loggingIn') : t('auth.login')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
+            {t('auth.dontHaveAccount')}{' '}
             <Link to="/signup" className="underline">
-              Sign up
+              {t('auth.signup')}
             </Link>
           </div>
         </CardContent>

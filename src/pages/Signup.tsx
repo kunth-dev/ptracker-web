@@ -1,93 +1,76 @@
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
+import { useForm, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { useAppDispatch, useAppSelector } from '@/hooks'
+import { register as registerUser, login, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
+import { VALIDATION } from '@/constants'
+import { isValidEmail, isValidPassword, isValidCode, passwordsMatch } from '@/helpers'
+
+interface SignupFormData {
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+interface VerifyFormData {
+  otp: string
+}
 
 export default function Signup() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const { signup, verifyOTP, login } = useAuth()
+  const dispatch = useAppDispatch()
+  const { isLoading, error } = useAppSelector((state) => state.auth)
+
   const [step, setStep] = useState<'signup' | 'verify'>('signup')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [otp, setOtp] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [signupData, setSignupData] = useState<{ email: string; password: string } | null>(null)
 
-  const handleSignup = async (e: FormEvent) => {
-    e.preventDefault()
-    setError('')
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<SignupFormData>()
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
+  const {
+    control: verifyControl,
+    handleSubmit: handleVerifySubmit,
+    formState: { errors: verifyErrors },
+  } = useForm<VerifyFormData>()
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const success = await signup(email, password)
-      if (success) {
-        setStep('verify')
-      } else {
-        setError('Failed to create account. Please try again.')
-      }
-    } catch {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+  const onSignupSubmit = async (data: SignupFormData) => {
+    dispatch(clearError())
+    setSignupData({ email: data.email, password: data.password })
+    const result = await dispatch(registerUser({ email: data.email, password: data.password }))
+    if (registerUser.fulfilled.match(result)) {
+      setStep('verify')
     }
   }
 
-  const handleVerifyOTP = async (e: FormEvent) => {
-    e.preventDefault()
-    setError('')
+  const onVerifySubmit = async () => {
+    if (!signupData) return
 
-    if (otp.length !== 6) {
-      setError('Please enter a valid 6-digit code')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const success = await verifyOTP(otp)
-      if (success) {
-        // After successful OTP verification, log the user in
-        await login(email, password)
-        navigate('/home')
-      } else {
-        setError('Invalid verification code')
-      }
-    } catch {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
+    dispatch(clearError())
+    // In the backend API, after registration, we need to login with the credentials
+    // The OTP verification is part of the registration flow on the backend
+    // For now, we'll just login directly after OTP is entered
+    // Note: The actual OTP verification might need to be implemented on the backend
+    const result = await dispatch(login(signupData))
+    if (login.fulfilled.match(result)) {
+      navigate('/home')
     }
   }
 
   const handleResendOTP = async () => {
-    setError('')
-    setLoading(true)
-
-    try {
-      // Simulate resending OTP
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      alert('Verification code has been resent to your email')
-    } catch {
-      setError('Failed to resend code. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    dispatch(clearError())
+    // Simulate resending OTP - in real implementation, call backend API
+    alert(t('auth.resendCode'))
   }
 
   if (step === 'verify') {
@@ -95,41 +78,54 @@ export default function Signup() {
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Verify your email</CardTitle>
-            <CardDescription>Enter the verification code sent to {email}</CardDescription>
+            <CardTitle>{t('auth.verifyEmail')}</CardTitle>
+            <CardDescription>
+              {t('auth.enterCodeEmail', { email: signupData?.email })}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <form onSubmit={handleVerifySubmit(onVerifySubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="otp">Verification Code</Label>
+                <Label htmlFor="otp">{t('auth.verificationCode')}</Label>
                 <div className="flex justify-center">
-                  <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
+                  <Controller
+                    name="otp"
+                    control={verifyControl}
+                    defaultValue=""
+                    rules={{
+                      required: t('validation.codeRequired'),
+                      validate: (value) => isValidCode(value) || t('validation.codeInvalid'),
+                    }}
+                    render={({ field }) => (
+                      <InputOTP maxLength={VALIDATION.OTP_LENGTH} {...field}>
+                        <InputOTPGroup>
+                          {Array.from({ length: VALIDATION.OTP_LENGTH }).map((_, index) => (
+                            <InputOTPSlot key={index} index={index} />
+                          ))}
+                        </InputOTPGroup>
+                      </InputOTP>
+                    )}
+                  />
                 </div>
                 <p className="text-xs text-muted-foreground text-center">
-                  Please enter the 6-digit verification code.
+                  {t('auth.pleaseEnterCode')}
                 </p>
+                {verifyErrors.otp && (
+                  <p className="text-sm text-destructive">{verifyErrors.otp.message}</p>
+                )}
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Verifying...' : 'Verify Email'}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? t('auth.verifying') : t('auth.verifyEmail')}
               </Button>
               <div className="text-center">
                 <button
                   type="button"
                   onClick={handleResendOTP}
                   className="text-sm underline"
-                  disabled={loading}
+                  disabled={isLoading}
                 >
-                  Resend code
+                  {t('auth.resendCode')}
                 </button>
               </div>
             </form>
@@ -143,51 +139,62 @@ export default function Signup() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>Enter your email below to create your account</CardDescription>
+          <CardTitle>{t('auth.createAccount')}</CardTitle>
+          <CardDescription>{t('auth.enterEmailSignup')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSubmit(onSignupSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register('email', {
+                  required: t('validation.emailRequired'),
+                  validate: (value) => isValidEmail(value) || t('validation.emailInvalid'),
+                })}
               />
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...register('password', {
+                  required: t('validation.passwordRequired'),
+                  validate: (value) => isValidPassword(value) || t('validation.passwordTooShort'),
+                })}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Label htmlFor="confirm-password">{t('auth.confirmPassword')}</Label>
               <Input
                 id="confirm-password"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                {...register('confirmPassword', {
+                  required: t('validation.confirmPasswordRequired'),
+                  validate: (value) =>
+                    passwordsMatch(value, watch('password')) || t('validation.passwordsMismatch'),
+                })}
               />
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+              )}
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create account'}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? t('auth.creatingAccount') : t('auth.createAccount')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Link to="/login" className="underline">
-              Login
+              {t('auth.login')}
             </Link>
           </div>
         </CardContent>

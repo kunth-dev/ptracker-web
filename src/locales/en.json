@@ -1,0 +1,72 @@
+{
+  "translation": {
+    "auth": {
+      "login": "Login",
+      "signup": "Sign up",
+      "logout": "Logout",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "newPassword": "New Password",
+      "forgotPassword": "Forgot your password?",
+      "resetPassword": "Reset Password",
+      "verificationCode": "Verification Code",
+      "enterEmail": "Enter your email below to login to your account",
+      "enterEmailSignup": "Enter your email below to create your account",
+      "enterCodeEmail": "Enter the verification code sent to {{email}}",
+      "enterResetEmail": "Enter your email address to receive a password reset code",
+      "enterCodeNewPassword": "Enter the OTP sent to your email and your new password",
+      "sendOTP": "Send OTP",
+      "sendingOTP": "Sending...",
+      "verifyEmail": "Verify your email",
+      "verifying": "Verifying...",
+      "resendCode": "Resend code",
+      "loggingIn": "Logging in...",
+      "creatingAccount": "Creating account...",
+      "resetting": "Resetting...",
+      "createAccount": "Create account",
+      "alreadyHaveAccount": "Already have an account?",
+      "dontHaveAccount": "Don't have an account?",
+      "passwordResetSuccess": "Password reset successful! Please login with your new password.",
+      "cancel": "Cancel",
+      "back": "Back",
+      "pleaseEnterCode": "Please enter the 6-digit verification code."
+    },
+    "home": {
+      "welcome": "Welcome to PTracker",
+      "welcomeBack": "Welcome back, {{email}}!",
+      "dashboard": "Dashboard",
+      "loading": "Loading user information..."
+    },
+    "errors": {
+      "validationFailed": "Validation failed. Please check your input.",
+      "invalidCredentials": "Invalid email or password",
+      "userNotFound": "User not found",
+      "userAlreadyExists": "User with this email already exists",
+      "emailAlreadyInUse": "Email is already in use",
+      "invalidResetCode": "Invalid reset code",
+      "resetCodeExpired": "Reset code has expired",
+      "resetCodeNotFound": "No reset code found",
+      "missingRequiredField": "Required field is missing",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least {{length}} characters",
+      "invalidEmail": "Invalid email address",
+      "invalidCode": "Please enter a valid {{length}}-digit code",
+      "genericError": "An error occurred. Please try again.",
+      "failedToSendOTP": "Failed to send OTP. Please try again.",
+      "failedToCreateAccount": "Failed to create account. Please try again.",
+      "invalidOTP": "Invalid verification code",
+      "failedToResetPassword": "Invalid OTP or failed to reset password"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsMismatch": "Passwords do not match",
+      "codeRequired": "Verification code is required",
+      "codeInvalid": "Verification code must be 6 digits"
+    }
+  }
+}
