@@ -32,6 +32,18 @@ ALLOWED_DOMAINS=http://localhost:5173,http://localhost:3000
 ALLOWED_DOMAINS=https://your-domain.com
 ```
 
+**Development Workaround:**
+
+If you encounter CORS errors during local development even after configuring the backend CORS settings, the frontend includes a Vite proxy configuration that routes API requests through the Vite dev server. This proxy:
+
+- Automatically intercepts requests to `/api/*` during development
+- Forwards them to the backend API (configured via `VITE_API_BASE_URL`)
+- Bypasses CORS restrictions by making requests server-side
+- Only works in development mode (`yarn dev`)
+- Does not affect production builds
+
+The proxy is configured in `configs/vite.config.ts` and automatically enabled when running the development server.
+
 ### 2. Bearer Token Configuration
 
 The frontend requires a valid bearer token to access protected endpoints. Configure this in the backend `.env`:

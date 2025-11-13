@@ -93,6 +93,8 @@ yarn dev
 
 The application will be available at `http://localhost:5173/`
 
+**Note:** The development server includes a proxy configuration that forwards API requests to the backend. This helps bypass CORS issues during local development. The proxy automatically routes requests from `/api/*` to your configured `VITE_API_BASE_URL`.
+
 ### Running Tests
 
 ```bash
