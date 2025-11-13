@@ -58,24 +58,43 @@ The application will be available at `http://localhost:5173/`
 
 ### Docker Deployment
 
+#### Local Development
+
 Run the application using Docker Compose:
 
 ```bash
 # Build and start the container
 docker-compose up -d
 
-# Or using Docker directly
-docker build -t ptracker-web .
-docker run -p 3000:3000 ptracker-web
+# View logs
+docker-compose logs -f
+
+# Stop the container
+docker-compose down
 ```
 
 The application will be available at `http://localhost:3000/`
 
-To stop the container:
+#### Production Deployment
 
-```bash
-docker-compose down
-```
+The project includes automated deployment via GitHub Actions.
+
+**Prerequisites:**
+1. Configure the following secrets in GitHub repository settings:
+   - `SERVER_SSH_HOST` - Your server hostname or IP
+   - `SERVER_SSH_LOGIN` - SSH username
+   - `SERVER_SSH_PASSWORD` - SSH password
+
+**Deploy:**
+1. Go to the "Actions" tab in your GitHub repository
+2. Select "Deploy to Remote Server" workflow
+3. Click "Run workflow"
+
+The workflow will:
+- Validate required secrets
+- Copy files to `/var/www/ptracker-web` on the remote server
+- Build and deploy using Docker Compose
+- Verify the deployment
 
 ## Building for Production
 
