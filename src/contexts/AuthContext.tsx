@@ -9,6 +9,7 @@ interface AuthContextType {
   verifyOTP: (otp: string) => Promise<boolean>
   requestPasswordReset: (email: string) => Promise<boolean>
   resetPasswordWithOTP: (email: string, otp: string, newPassword: string) => Promise<boolean>
+  isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<{ email: string } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // Simulate API call
@@ -106,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData)
       setIsAuthenticated(true)
     }
+    setIsLoading(false)
   }, [])
 
   return (
@@ -119,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyOTP,
         requestPasswordReset,
         resetPasswordWithOTP,
+        isLoading,
       }}
     >
       {children}

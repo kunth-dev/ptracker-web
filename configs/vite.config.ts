@@ -16,4 +16,14 @@ export default defineConfig({
   css: {
     postcss: path.resolve(__dirname, './postcss.config.js'),
   },
+  preview: {
+    port: 4173,
+    strictPort: true,
+    open: true,
+  },
+  server: {
+    port: 5173,
+    strictPort: true,
+    open: true,
+  },
 })
