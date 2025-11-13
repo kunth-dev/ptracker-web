@@ -283,6 +283,14 @@ The application integrates with the PTracker backend API:
 
 See [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md) for complete integration details.
 
+## Troubleshooting
+
+Having issues? Check the [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) for solutions to common problems including:
+- Mixed Content errors (CORS issues with HTTPS)
+- Authentication failures
+- Build and deployment issues
+- Backend connectivity problems
+
 ## UI Components
 
 The project uses ShadCN UI components including:
