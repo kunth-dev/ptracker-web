@@ -50,7 +50,12 @@ export interface LoginResponse {
   updatedAt: string
 }
 
-export interface RegisterResponse extends LoginResponse {}
+export interface RegisterResponse {
+  userId: string
+  email: string
+  createdAt: string
+  updatedAt: string
+}
 
 export interface ForgotPasswordResponse {
   expiresAt: string
