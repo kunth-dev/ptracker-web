@@ -6,8 +6,12 @@ class ApiService {
   private api: AxiosInstance
 
   constructor() {
+    // In development, use relative URL to leverage Vite proxy
+    // In production, use the full API URL from environment variable
+    const baseURL = import.meta.env.DEV ? '/api' : API_BASE_URL
+    
     this.api = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL,
       headers: {
         'Content-Type': 'application/json',
       },
