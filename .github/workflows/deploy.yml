@@ -89,6 +89,14 @@ jobs:
           password: ${{ secrets.SERVER_SSH_PASSWORD }}
           script: |
             cd /var/www/ptracker-web
+            
+            # Create .env file with environment variables
+            cat > .env << EOF
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+            VITE_API_BEARER_TOKEN=${{ secrets.VITE_API_BEARER_TOKEN }}
+            VITE_APP_NAME=PTracker
+            EOF
+            
             docker-compose down
             docker-compose up -d --build
             docker-compose ps
