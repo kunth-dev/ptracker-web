@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import moment from 'moment'
 import { useAppDispatch, useAppSelector } from '@/hooks'
 import { logout } from '@/store/authSlice'
 import { userService } from '@/services'
@@ -37,7 +38,9 @@ export default function Home() {
     }
 
     fetchUserData()
-  }, [authUser])
+    // Set moment locale based on current i18n language
+    moment.locale(i18n.language)
+  }, [authUser, i18n.language])
 
   const handleLogout = () => {
     dispatch(logout())
@@ -47,6 +50,8 @@ export default function Home() {
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'ru' : 'en'
     i18n.changeLanguage(newLang)
+    // Update moment locale when language changes
+    moment.locale(newLang)
   }
 
   return (
@@ -99,15 +104,13 @@ export default function Home() {
                       <div>
                         <dt className="text-sm font-medium">Created At:</dt>
                         <dd className="text-sm text-muted-foreground">
-                          {user?.createdAt &&
-                            new Date(user.createdAt).toLocaleString(i18n.language)}
+                          {user?.createdAt && moment(user.createdAt).format('LLL')}
                         </dd>
                       </div>
                       <div>
                         <dt className="text-sm font-medium">Updated At:</dt>
                         <dd className="text-sm text-muted-foreground">
-                          {user?.updatedAt &&
-                            new Date(user.updatedAt).toLocaleString(i18n.language)}
+                          {user?.updatedAt && moment(user.updatedAt).format('LLL')}
                         </dd>
                       </div>
                     </dl>
