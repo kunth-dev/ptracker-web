@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import RegisterConfirmation from './pages/RegisterConfirmation'
 import Home from './pages/Home'
 import RootLayout from './components/RootLayout'
 import ProtectedRootLayout from './components/ProtectedRootLayout'
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
       {
         path: 'signup',
         element: <Signup />,
+      },
+      {
+        path: 'register/confirmation',
+        element: <RegisterConfirmation />,
       },
       {
         element: <ProtectedRootLayout />,

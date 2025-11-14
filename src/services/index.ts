@@ -11,6 +11,8 @@ import type {
   VerifyEmailRequest,
   ResendVerificationCodeRequest,
   SendResetCodeRequest,
+  RegisterConfirmationRequest,
+  ResendConfirmationEmailRequest,
   ApiResponse,
   User,
 } from '@/types'
@@ -26,6 +28,14 @@ export const authService = {
 
   async resendVerificationCode(data: ResendVerificationCodeRequest): Promise<ApiResponse<void>> {
     return apiService.post<void>(API_ENDPOINTS.RESEND_VERIFICATION_CODE, data)
+  },
+
+  async registerConfirmation(data: RegisterConfirmationRequest): Promise<ApiResponse<void>> {
+    return apiService.post<void>(API_ENDPOINTS.REGISTER_CONFIRMATION, data)
+  },
+
+  async resendConfirmationEmail(data: ResendConfirmationEmailRequest): Promise<ApiResponse<void>> {
+    return apiService.post<void>(API_ENDPOINTS.RESEND_CONFIRMATION_EMAIL, data)
   },
 
   async login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {

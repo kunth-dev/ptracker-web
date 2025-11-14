@@ -1,17 +1,15 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useForm, Controller } from 'react-hook-form'
+import { Link } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/hooks'
 import { useAlert } from '@/contexts/AlertContext'
-import { register as registerUser, verifyEmail, resendVerificationCode, login, clearError } from '@/store/authSlice'
+import { register as registerUser, resendConfirmationEmail, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
-import { VALIDATION } from '@/constants'
-import { isValidEmail, isValidPassword, isValidCode, passwordsMatch } from '@/helpers'
+import { isValidEmail, isValidPassword, passwordsMatch } from '@/helpers'
 
 interface SignupFormData {
   email: string
@@ -19,19 +17,14 @@ interface SignupFormData {
   confirmPassword: string
 }
 
-interface VerifyFormData {
-  otp: string
-}
-
 export default function Signup() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { isLoading, error } = useAppSelector((state) => state.auth)
   const { showAlert } = useAlert()
 
-  const [step, setStep] = useState<'signup' | 'verify'>('signup')
-  const [signupData, setSignupData] = useState<{ email: string; password: string } | null>(null)
+  const [step, setStep] = useState<'signup' | 'success'>('signup')
+  const [userEmail, setUserEmail] = useState<string>('')
 
   const {
     register,
@@ -40,104 +33,51 @@ export default function Signup() {
     formState: { errors },
   } = useForm<SignupFormData>()
 
-  const {
-    control: verifyControl,
-    handleSubmit: handleVerifySubmit,
-    formState: { errors: verifyErrors },
-  } = useForm<VerifyFormData>()
-
   const onSignupSubmit = async (data: SignupFormData) => {
     dispatch(clearError())
-    setSignupData({ email: data.email, password: data.password })
     const result = await dispatch(registerUser({ email: data.email, password: data.password }))
     if (registerUser.fulfilled.match(result)) {
-      // Backend should send OTP code to user's email
-      setStep('verify')
+      // Backend should send confirmation link to user's email
+      setUserEmail(data.email)
+      setStep('success')
     }
   }
 
-  const onVerifySubmit = async (data: VerifyFormData) => {
-    if (!signupData) return
+  const handleResendLink = async () => {
+    if (!userEmail) return
 
     dispatch(clearError())
-    // Verify the OTP code with the backend
-    const result = await dispatch(verifyEmail({ email: signupData.email, code: data.otp }))
-    if (verifyEmail.fulfilled.match(result)) {
-      // After successful verification, login the user
-      const loginResult = await dispatch(login(signupData))
-      if (login.fulfilled.match(loginResult)) {
-        navigate('/home')
-      }
+    // Call backend API to resend confirmation email
+    const result = await dispatch(resendConfirmationEmail({ email: userEmail }))
+    if (resendConfirmationEmail.fulfilled.match(result)) {
+      showAlert(t('auth.linkSent'), undefined, 'success')
     }
   }
 
-  const handleResendOTP = async () => {
-    if (!signupData) return
-
-    dispatch(clearError())
-    // Call backend API to resend verification code
-    const result = await dispatch(resendVerificationCode({ email: signupData.email }))
-    if (resendVerificationCode.fulfilled.match(result)) {
-      showAlert(t('auth.codeSent'), undefined, 'success')
-    }
-  }
-
-  if (step === 'verify') {
+  if (step === 'success') {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>{t('auth.verifyEmail')}</CardTitle>
+            <CardTitle>{t('auth.checkEmail')}</CardTitle>
             <CardDescription>
-              {t('auth.enterCodeEmail', { email: signupData?.email })}
+              {t('auth.confirmationLinkSent', { email: userEmail })}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleVerifySubmit(onVerifySubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">{t('auth.verificationCode')}</Label>
-                <div className="flex justify-center">
-                  <Controller
-                    name="otp"
-                    control={verifyControl}
-                    defaultValue=""
-                    rules={{
-                      required: t('validation.codeRequired'),
-                      validate: (value) => isValidCode(value) || t('validation.codeInvalid'),
-                    }}
-                    render={({ field }) => (
-                      <InputOTP maxLength={VALIDATION.OTP_LENGTH} {...field}>
-                        <InputOTPGroup>
-                          {Array.from({ length: VALIDATION.OTP_LENGTH }).map((_, index) => (
-                            <InputOTPSlot key={index} index={index} />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
-                    )}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  {t('auth.pleaseEnterCode')}
-                </p>
-                {verifyErrors.otp && (
-                  <p className="text-sm text-destructive">{verifyErrors.otp.message}</p>
-                )}
-              </div>
+            <div className="space-y-4">
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t('auth.verifying') : t('auth.verifyEmail')}
-              </Button>
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={handleResendOTP}
+                  onClick={handleResendLink}
                   className="text-sm underline"
                   disabled={isLoading}
                 >
-                  {t('auth.resendCode')}
+                  {t('auth.resendLink')}
                 </button>
               </div>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>

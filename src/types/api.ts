@@ -40,6 +40,14 @@ export interface SendResetCodeRequest {
   email: string
 }
 
+export interface RegisterConfirmationRequest {
+  uuid: string
+}
+
+export interface ResendConfirmationEmailRequest {
+  email: string
+}
+
 // API Response types
 export interface ApiResponse<T = unknown> {
   success: boolean
