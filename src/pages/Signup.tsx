@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/hooks'
+import { useAlert } from '@/contexts/AlertContext'
 import { register as registerUser, verifyEmail, resendVerificationCode, login, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +28,7 @@ export default function Signup() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { isLoading, error } = useAppSelector((state) => state.auth)
+  const { showAlert } = useAlert()
 
   const [step, setStep] = useState<'signup' | 'verify'>('signup')
   const [signupData, setSignupData] = useState<{ email: string; password: string } | null>(null)
@@ -76,7 +78,7 @@ export default function Signup() {
     // Call backend API to resend verification code
     const result = await dispatch(resendVerificationCode({ email: signupData.email }))
     if (resendVerificationCode.fulfilled.match(result)) {
-      alert(t('auth.codeSent'))
+      showAlert(t('auth.codeSent'), undefined, 'success')
     }
   }
 

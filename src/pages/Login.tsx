@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/hooks'
+import { useAlert } from '@/contexts/AlertContext'
 import { login, forgotPassword, sendResetCode, resetPassword, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +33,7 @@ export default function Login() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { isLoading, error } = useAppSelector((state) => state.auth)
+  const { showAlert } = useAlert()
 
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [showOTPInput, setShowOTPInput] = useState(false)
@@ -87,7 +89,7 @@ export default function Login() {
       setShowForgotPassword(false)
       setShowOTPInput(false)
       setResetEmail('')
-      alert(t('auth.passwordResetSuccess'))
+      showAlert(t('auth.passwordResetSuccess'), undefined, 'success')
     }
   }
 
@@ -96,7 +98,7 @@ export default function Login() {
     // Call backend API to resend password reset code
     const result = await dispatch(sendResetCode(resetEmail))
     if (sendResetCode.fulfilled.match(result)) {
-      alert(t('auth.codeSent'))
+      showAlert(t('auth.codeSent'), undefined, 'success')
     }
   }
 
