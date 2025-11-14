@@ -8,7 +8,9 @@ import type {
   RegisterRequest, 
   ResetPasswordRequest,
   VerifyEmailRequest,
-  ResendVerificationCodeRequest
+  ResendVerificationCodeRequest,
+  RegisterConfirmationRequest,
+  ResendConfirmationEmailRequest
 } from '@/types'
 
 const initialState: AuthState = {
@@ -75,6 +77,36 @@ export const resendVerificationCode = createAsyncThunk(
         return true
       }
       return rejectWithValue('Failed to resend verification code')
+    } catch (error) {
+      return rejectWithValue(apiService.getErrorMessage(error))
+    }
+  }
+)
+
+export const registerConfirmation = createAsyncThunk(
+  'auth/registerConfirmation',
+  async (data: RegisterConfirmationRequest, { rejectWithValue }) => {
+    try {
+      const response = await authService.registerConfirmation(data)
+      if (response.success) {
+        return true
+      }
+      return rejectWithValue('Email confirmation failed')
+    } catch (error) {
+      return rejectWithValue(apiService.getErrorMessage(error))
+    }
+  }
+)
+
+export const resendConfirmationEmail = createAsyncThunk(
+  'auth/resendConfirmationEmail',
+  async (data: ResendConfirmationEmailRequest, { rejectWithValue }) => {
+    try {
+      const response = await authService.resendConfirmationEmail(data)
+      if (response.success) {
+        return true
+      }
+      return rejectWithValue('Failed to resend confirmation email')
     } catch (error) {
       return rejectWithValue(apiService.getErrorMessage(error))
     }
@@ -215,6 +247,36 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(resendVerificationCode.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Register Confirmation
+    builder
+      .addCase(registerConfirmation.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(registerConfirmation.fulfilled, (state) => {
+        state.isLoading = false
+        state.error = null
+      })
+      .addCase(registerConfirmation.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Resend Confirmation Email
+    builder
+      .addCase(resendConfirmationEmail.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(resendConfirmationEmail.fulfilled, (state) => {
+        state.isLoading = false
+        state.error = null
+      })
+      .addCase(resendConfirmationEmail.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload as string
       })

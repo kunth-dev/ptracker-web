@@ -32,7 +32,13 @@
       "passwordResetSuccess": "Password reset successful! Please login with your new password.",
       "cancel": "Cancel",
       "back": "Back",
-      "pleaseEnterCode": "Please enter the 6-digit verification code."
+      "pleaseEnterCode": "Please enter the 6-digit verification code.",
+      "checkEmail": "Check your email",
+      "confirmationLinkSent": "We've sent a confirmation link to {{email}}. Please check your inbox and click the link to verify your email address.",
+      "resendLink": "Resend Link",
+      "emailConfirmed": "Email confirmed successfully!",
+      "confirmationError": "Email confirmation failed. The link may be invalid or expired.",
+      "linkSent": "Confirmation link sent successfully!"
     },
     "home": {
       "welcome": "Welcome to PTracker",
