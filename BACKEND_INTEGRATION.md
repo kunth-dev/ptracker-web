@@ -8,6 +8,8 @@ Based on the API documentation from [kunth-dev/ptracker-api](https://github.com/
 
 ### Public Endpoints (No authentication required)
 - ✅ `POST /api/auth/register` - User registration
+- ✅ `POST /api/auth/verify-email` - Verify email with OTP code (signup)
+- ✅ `POST /api/auth/resend-verification-code` - Resend verification code (signup)
 - ✅ `POST /api/auth/login` - User login
 - ✅ `POST /api/auth/forgot-password` - Request password reset code
 - ✅ `POST /api/auth/send-reset-code` - Resend password reset code
@@ -70,18 +72,16 @@ VITE_APP_NAME=PTracker
 
 ## Known Limitations / Future Work
 
-### 1. OTP Verification for Signup
+### 1. Email Verification for Signup
 
 **Current Implementation:**
-- The backend's `/api/auth/register` endpoint creates a user account
-- The frontend shows an OTP verification step after registration
-- However, the backend doesn't have a dedicated OTP verification endpoint for signup
+- The backend's `/api/auth/register` endpoint creates a user account and sends a verification code
+- The frontend now properly validates the OTP code using `/api/auth/verify-email` endpoint
+- Users can resend verification codes using `/api/auth/resend-verification-code` endpoint
+- After successful OTP verification, the frontend automatically logs the user in
 
-**Options:**
-1. **Keep current flow (Recommended for MVP)**: After the user enters the OTP (which is currently not validated), the frontend automatically logs them in using `/api/auth/login`
-2. **Implement backend OTP verification**: Add a new endpoint to the backend API
-
-**If Option 2 is chosen, add this endpoint to the backend:**
+**Required Backend Endpoints:**
+If the backend doesn't have these endpoints yet, they need to be implemented:
 
 ```typescript
 // POST /api/auth/verify-email
@@ -98,6 +98,20 @@ VITE_APP_NAME=PTracker
 }
 ```
 
+```typescript
+// POST /api/auth/resend-verification-code
+// Request body:
+{
+  "email": "user@example.com"
+}
+
+// Response:
+{
+  "success": true,
+  "message": "Verification code sent successfully"
+}
+```
+
 ### 2. Password Reset Flow
 
 **Current Status:**
@@ -106,6 +120,7 @@ The password reset flow is fully functional:
 2. Backend sends code to user's email (logged to console in dev)
 3. User enters code and new password
 4. Frontend calls `/api/auth/reset-password` to complete the process
+5. User can resend the reset code via `/api/auth/send-reset-code` if needed
 
 **Note:** In production, the backend should send actual emails instead of logging codes to the console.
 
@@ -129,15 +144,26 @@ Integrate an email service (SendGrid, AWS SES, etc.) in the backend to send:
 
 ### Test Cases
 
-#### 1. User Registration
+#### 1. User Registration and Email Verification Flow
 ```bash
-# Test with the backend API directly
+# Step 1: Register a new user
 curl -X POST http://localhost:3002/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
+
+# Check backend console for the verification code
+# Step 2: Verify email with the code
+curl -X POST http://localhost:3002/api/auth/verify-email \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","code":"123456"}'
+
+# Optional: Resend verification code if needed
+curl -X POST http://localhost:3002/api/auth/resend-verification-code \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com"}'
 ```
 
-Expected: User created successfully (201)
+Expected: User created (201), email verified (200)
 
 #### 2. User Login
 ```bash
@@ -164,6 +190,11 @@ curl -X POST http://localhost:3002/api/auth/forgot-password \
   -d '{"email":"test@example.com"}'
 
 # Check backend console for the code
+# Optional: Resend reset code if needed
+curl -X POST http://localhost:3002/api/auth/send-reset-code \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com"}'
+
 # Step 2: Reset password with code
 curl -X POST http://localhost:3002/api/auth/reset-password \
   -H "Content-Type: application/json" \

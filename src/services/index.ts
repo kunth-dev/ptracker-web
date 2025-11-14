@@ -8,6 +8,9 @@ import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   ResetPasswordRequest,
+  VerifyEmailRequest,
+  ResendVerificationCodeRequest,
+  SendResetCodeRequest,
   ApiResponse,
   User,
 } from '@/types'
@@ -17,12 +20,24 @@ export const authService = {
     return apiService.post<RegisterResponse>(API_ENDPOINTS.REGISTER, data)
   },
 
+  async verifyEmail(data: VerifyEmailRequest): Promise<ApiResponse<void>> {
+    return apiService.post<void>(API_ENDPOINTS.VERIFY_EMAIL, data)
+  },
+
+  async resendVerificationCode(data: ResendVerificationCodeRequest): Promise<ApiResponse<void>> {
+    return apiService.post<void>(API_ENDPOINTS.RESEND_VERIFICATION_CODE, data)
+  },
+
   async login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     return apiService.post<LoginResponse>(API_ENDPOINTS.LOGIN, data)
   },
 
   async forgotPassword(data: ForgotPasswordRequest): Promise<ApiResponse<ForgotPasswordResponse>> {
     return apiService.post<ForgotPasswordResponse>(API_ENDPOINTS.FORGOT_PASSWORD, data)
+  },
+
+  async sendResetCode(data: SendResetCodeRequest): Promise<ApiResponse<ForgotPasswordResponse>> {
+    return apiService.post<ForgotPasswordResponse>(API_ENDPOINTS.SEND_RESET_CODE, data)
   },
 
   async resetPassword(data: ResetPasswordRequest): Promise<ApiResponse<void>> {
