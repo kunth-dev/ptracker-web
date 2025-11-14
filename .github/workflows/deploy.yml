@@ -15,7 +15,6 @@ jobs:
           SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
           SERVER_SSH_LOGIN: ${{ secrets.SERVER_SSH_LOGIN }}
           SERVER_SSH_PASSWORD: ${{ secrets.SERVER_SSH_PASSWORD }}
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
         run: |
           error_found=false
           
@@ -34,30 +33,21 @@ jobs:
             error_found=true
           fi
           
-          if [ -z "$VITE_API_BASE_URL" ]; then
-            echo "::warning::SECRET 'VITE_API_BASE_URL' is not configured. The application will use the default from .env file."
-          elif [[ "$VITE_API_BASE_URL" == http://* ]]; then
-            echo "::error::SECRET 'VITE_API_BASE_URL' uses HTTP protocol. For HTTPS deployments, you MUST use HTTPS to avoid Mixed Content errors."
-            echo "::error::Current value starts with: http://"
-            echo "::error::Expected format: https://api.yourdomain.com/api"
-            error_found=true
-          fi
-          
           if [ "$error_found" = true ]; then
             echo ""
             echo "=========================================="
-            echo "DEPLOYMENT FAILED: Configuration Issues"
+            echo "DEPLOYMENT FAILED: Missing Required Secrets"
             echo "=========================================="
             echo ""
-            echo "Please fix the issues above in your GitHub repository:"
+            echo "Please configure the missing secrets in your GitHub repository:"
             echo "1. Go to Settings > Secrets and variables > Actions > Secrets"
-            echo "2. Add or update the secrets as needed"
-            echo "3. Ensure VITE_API_BASE_URL uses HTTPS if deploying to HTTPS site"
+            echo "2. Click 'New repository secret'"
+            echo "3. Add each missing secret listed above"
             echo ""
             exit 1
           fi
           
-          echo "✅ All required secrets are configured correctly"
+          echo "✅ All required secrets are configured"
   
   deploy:
     name: Deploy Web to Remote Server

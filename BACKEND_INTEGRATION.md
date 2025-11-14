@@ -68,29 +68,6 @@ VITE_API_BEARER_TOKEN=your_secret_bearer_token_here
 VITE_APP_NAME=PTracker
 ```
 
-**⚠️ IMPORTANT for Production Deployments:**
-
-When deploying to production with HTTPS, you **must** use HTTPS for the API URL to avoid Mixed Content errors:
-
-```bash
-# Production Configuration (HTTPS required)
-VITE_API_BASE_URL=https://api.yourdomain.com/api
-VITE_API_BEARER_TOKEN=your_secure_production_token
-
-# App Configuration
-VITE_APP_NAME=PTracker
-```
-
-**Common Error:**
-If you see console errors like:
-```
-Mixed Content: The page at 'https://yourdomain.com' was loaded over HTTPS, 
-but requested an insecure XMLHttpRequest endpoint 'http://api.yourdomain.com/api/...'. 
-This request has been blocked; the content must be served over HTTPS.
-```
-
-This means your `VITE_API_BASE_URL` is using `http://` instead of `https://`. Update your environment variable and rebuild the application.
-
 ## Known Limitations / Future Work
 
 ### 1. OTP Verification for Signup
@@ -207,17 +184,16 @@ Expected: Password reset successfully (200)
 - [ ] Enable HTTPS
 
 ### Frontend
-- [ ] Update `.env` with production API URL **(MUST use HTTPS, not HTTP)**
+- [ ] Update `.env` with production API URL
 - [ ] Update `.env` with production bearer token
 - [ ] Configure GitHub Secrets for CI/CD:
-  - `VITE_API_BASE_URL` **(MUST start with https://)**
+  - `VITE_API_BASE_URL`
   - `VITE_API_BEARER_TOKEN`
   - `SERVER_SSH_HOST`
   - `SERVER_SSH_LOGIN`
   - `SERVER_SSH_PASSWORD`
 - [ ] Test end-to-end flows in staging environment
 - [ ] Enable HTTPS
-- [ ] Verify no Mixed Content errors in browser console
 
 ## Support
 
