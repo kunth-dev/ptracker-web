@@ -6,20 +6,8 @@ class ApiService {
   private api: AxiosInstance
 
   constructor() {
-    // In development, use relative URL to leverage Vite proxy
-    // In production, use the full API URL from environment variable
-    const baseURL = import.meta.env.DEV ? '/api' : API_BASE_URL
-    
-    // Warn if using HTTP in production (causes Mixed Content errors with HTTPS sites)
-    if (!import.meta.env.DEV && baseURL.startsWith('http://')) {
-      console.warn(
-        '⚠️ WARNING: Using HTTP API URL in production. This will cause Mixed Content errors if the site is served over HTTPS. ' +
-        'Please update VITE_API_BASE_URL to use HTTPS (e.g., https://api.yourdomain.com/api)'
-      )
-    }
-    
     this.api = axios.create({
-      baseURL,
+      baseURL: API_BASE_URL,
       headers: {
         'Content-Type': 'application/json',
       },
