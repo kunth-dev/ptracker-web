@@ -36,6 +36,7 @@ export default function Login() {
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [showOTPInput, setShowOTPInput] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
+  const [otpVerified, setOtpVerified] = useState(false)
 
   const {
     register: registerLogin,
@@ -86,6 +87,7 @@ export default function Login() {
     if (resetPassword.fulfilled.match(result)) {
       setShowForgotPassword(false)
       setShowOTPInput(false)
+      setOtpVerified(false)
       setResetEmail('')
       alert(t('auth.passwordResetSuccess'))
     }
@@ -98,6 +100,19 @@ export default function Login() {
     if (sendResetCode.fulfilled.match(result)) {
       alert(t('auth.codeSent'))
     }
+  }
+
+  const handleVerifyOTP = () => {
+    const code = watch('code')
+    dispatch(clearError())
+    
+    // Validate the code format
+    if (!code || !isValidCode(code)) {
+      return
+    }
+    
+    // Mark OTP as verified and show password fields
+    setOtpVerified(true)
   }
 
   if (showForgotPassword) {
@@ -174,65 +189,95 @@ export default function Login() {
                     <p className="text-sm text-destructive">{resetErrors.code.message}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    {...registerReset('newPassword', {
-                      required: t('validation.passwordRequired'),
-                      validate: (value) =>
-                        isValidPassword(value) || t('validation.passwordTooShort'),
-                    })}
-                  />
-                  {resetErrors.newPassword && (
-                    <p className="text-sm text-destructive">{resetErrors.newPassword.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">{t('auth.confirmPassword')}</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    {...registerReset('confirmPassword', {
-                      required: t('validation.confirmPasswordRequired'),
-                      validate: (value) =>
-                        passwordsMatch(value, watch('newPassword')) ||
-                        t('validation.passwordsMismatch'),
-                    })}
-                  />
-                  {resetErrors.confirmPassword && (
-                    <p className="text-sm text-destructive">
-                      {resetErrors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <div className="flex gap-2">
-                  <Button type="submit" className="flex-1" disabled={isLoading}>
-                    {isLoading ? t('auth.resetting') : t('auth.resetPassword')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowOTPInput(false)
-                      dispatch(clearError())
-                    }}
-                  >
-                    {t('auth.back')}
-                  </Button>
-                </div>
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={handleResendResetCode}
-                    className="text-sm underline"
-                    disabled={isLoading}
-                  >
-                    {t('auth.resendCode')}
-                  </button>
-                </div>
+                
+                {!otpVerified ? (
+                  <>
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <div className="flex gap-2">
+                      <Button 
+                        type="button" 
+                        onClick={handleVerifyOTP}
+                        className="flex-1" 
+                        disabled={isLoading || !watch('code') || watch('code').length !== VALIDATION.OTP_LENGTH}
+                      >
+                        {t('auth.verifyCode')}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowOTPInput(false)
+                          setOtpVerified(false)
+                          dispatch(clearError())
+                        }}
+                      >
+                        {t('auth.back')}
+                      </Button>
+                    </div>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={handleResendResetCode}
+                        className="text-sm underline"
+                        disabled={isLoading}
+                      >
+                        {t('auth.resendCode')}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        {...registerReset('newPassword', {
+                          required: t('validation.passwordRequired'),
+                          validate: (value) =>
+                            isValidPassword(value) || t('validation.passwordTooShort'),
+                        })}
+                      />
+                      {resetErrors.newPassword && (
+                        <p className="text-sm text-destructive">{resetErrors.newPassword.message}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">{t('auth.confirmPassword')}</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        {...registerReset('confirmPassword', {
+                          required: t('validation.confirmPasswordRequired'),
+                          validate: (value) =>
+                            passwordsMatch(value, watch('newPassword')) ||
+                            t('validation.passwordsMismatch'),
+                        })}
+                      />
+                      {resetErrors.confirmPassword && (
+                        <p className="text-sm text-destructive">
+                          {resetErrors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <div className="flex gap-2">
+                      <Button type="submit" className="flex-1" disabled={isLoading}>
+                        {isLoading ? t('auth.resetting') : t('auth.resetPassword')}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setOtpVerified(false)
+                          dispatch(clearError())
+                        }}
+                      >
+                        {t('auth.back')}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </form>
             )}
           </CardContent>

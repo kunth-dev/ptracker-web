@@ -11,6 +11,7 @@
       "forgotPassword": "Forgot your password?",
       "resetPassword": "Reset Password",
       "verificationCode": "Verification Code",
+      "verifyCode": "Verify Code",
       "enterEmail": "Enter your email below to login to your account",
       "enterEmailSignup": "Enter your email below to create your account",
       "enterCodeEmail": "Enter the verification code sent to {{email}}",
