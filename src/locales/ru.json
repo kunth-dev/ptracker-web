@@ -21,6 +21,7 @@
       "verifyEmail": "Подтвердите email",
       "verifying": "Проверка...",
       "resendCode": "Отправить код повторно",
+      "codeSent": "Код подтверждения успешно отправлен!",
       "loggingIn": "Вход...",
       "creatingAccount": "Создание аккаунта...",
       "resetting": "Сброс...",

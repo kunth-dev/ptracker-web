@@ -21,6 +21,7 @@
       "verifyEmail": "Verify your email",
       "verifying": "Verifying...",
       "resendCode": "Resend code",
+      "codeSent": "Verification code sent successfully!",
       "loggingIn": "Logging in...",
       "creatingAccount": "Creating account...",
       "resetting": "Resetting...",
