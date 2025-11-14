@@ -11,6 +11,7 @@
       "forgotPassword": "Забыли пароль?",
       "resetPassword": "Сброс пароля",
       "verificationCode": "Код подтверждения",
+      "verifyCode": "Проверить код",
       "enterEmail": "Введите email для входа в ваш аккаунт",
       "enterEmailSignup": "Введите email для создания аккаунта",
       "enterCodeEmail": "Введите код подтверждения, отправленный на {{email}}",
