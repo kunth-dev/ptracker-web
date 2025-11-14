@@ -27,6 +27,19 @@ export interface ResetPasswordRequest {
   newPassword: string
 }
 
+export interface VerifyEmailRequest {
+  email: string
+  code: string
+}
+
+export interface ResendVerificationCodeRequest {
+  email: string
+}
+
+export interface SendResetCodeRequest {
+  email: string
+}
+
 // API Response types
 export interface ApiResponse<T = unknown> {
   success: boolean

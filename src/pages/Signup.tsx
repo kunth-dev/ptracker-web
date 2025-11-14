@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/hooks'
-import { register as registerUser, login, clearError } from '@/store/authSlice'
+import { register as registerUser, verifyEmail, resendVerificationCode, login, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,28 +49,35 @@ export default function Signup() {
     setSignupData({ email: data.email, password: data.password })
     const result = await dispatch(registerUser({ email: data.email, password: data.password }))
     if (registerUser.fulfilled.match(result)) {
+      // Backend should send OTP code to user's email
       setStep('verify')
     }
   }
 
-  const onVerifySubmit = async () => {
+  const onVerifySubmit = async (data: VerifyFormData) => {
     if (!signupData) return
 
     dispatch(clearError())
-    // In the backend API, after registration, we need to login with the credentials
-    // The OTP verification is part of the registration flow on the backend
-    // For now, we'll just login directly after OTP is entered
-    // Note: The actual OTP verification might need to be implemented on the backend
-    const result = await dispatch(login(signupData))
-    if (login.fulfilled.match(result)) {
-      navigate('/home')
+    // Verify the OTP code with the backend
+    const result = await dispatch(verifyEmail({ email: signupData.email, code: data.otp }))
+    if (verifyEmail.fulfilled.match(result)) {
+      // After successful verification, login the user
+      const loginResult = await dispatch(login(signupData))
+      if (login.fulfilled.match(loginResult)) {
+        navigate('/home')
+      }
     }
   }
 
   const handleResendOTP = async () => {
+    if (!signupData) return
+
     dispatch(clearError())
-    // Simulate resending OTP - in real implementation, call backend API
-    alert(t('auth.resendCode'))
+    // Call backend API to resend verification code
+    const result = await dispatch(resendVerificationCode({ email: signupData.email }))
+    if (resendVerificationCode.fulfilled.match(result)) {
+      alert(t('auth.codeSent'))
+    }
   }
 
   if (step === 'verify') {

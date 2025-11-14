@@ -1,7 +1,15 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { authService } from '@/services'
 import { apiService } from '@/services/api'
-import type { AuthState, User, LoginRequest, RegisterRequest, ResetPasswordRequest } from '@/types'
+import type { 
+  AuthState, 
+  User, 
+  LoginRequest, 
+  RegisterRequest, 
+  ResetPasswordRequest,
+  VerifyEmailRequest,
+  ResendVerificationCodeRequest
+} from '@/types'
 
 const initialState: AuthState = {
   user: null,
@@ -43,6 +51,36 @@ export const register = createAsyncThunk(
   }
 )
 
+export const verifyEmail = createAsyncThunk(
+  'auth/verifyEmail',
+  async (data: VerifyEmailRequest, { rejectWithValue }) => {
+    try {
+      const response = await authService.verifyEmail(data)
+      if (response.success) {
+        return true
+      }
+      return rejectWithValue('Email verification failed')
+    } catch (error) {
+      return rejectWithValue(apiService.getErrorMessage(error))
+    }
+  }
+)
+
+export const resendVerificationCode = createAsyncThunk(
+  'auth/resendVerificationCode',
+  async (data: ResendVerificationCodeRequest, { rejectWithValue }) => {
+    try {
+      const response = await authService.resendVerificationCode(data)
+      if (response.success) {
+        return true
+      }
+      return rejectWithValue('Failed to resend verification code')
+    } catch (error) {
+      return rejectWithValue(apiService.getErrorMessage(error))
+    }
+  }
+)
+
 export const forgotPassword = createAsyncThunk(
   'auth/forgotPassword',
   async (email: string, { rejectWithValue }) => {
@@ -52,6 +90,21 @@ export const forgotPassword = createAsyncThunk(
         return response.data
       }
       return rejectWithValue('Failed to send reset code')
+    } catch (error) {
+      return rejectWithValue(apiService.getErrorMessage(error))
+    }
+  }
+)
+
+export const sendResetCode = createAsyncThunk(
+  'auth/sendResetCode',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await authService.sendResetCode({ email })
+      if (response.success) {
+        return response.data
+      }
+      return rejectWithValue('Failed to resend reset code')
     } catch (error) {
       return rejectWithValue(apiService.getErrorMessage(error))
     }
@@ -136,6 +189,36 @@ const authSlice = createSlice({
         state.error = action.payload as string
       })
 
+    // Verify Email
+    builder
+      .addCase(verifyEmail.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(verifyEmail.fulfilled, (state) => {
+        state.isLoading = false
+        state.error = null
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Resend Verification Code
+    builder
+      .addCase(resendVerificationCode.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(resendVerificationCode.fulfilled, (state) => {
+        state.isLoading = false
+        state.error = null
+      })
+      .addCase(resendVerificationCode.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
     // Forgot Password
     builder
       .addCase(forgotPassword.pending, (state) => {
@@ -147,6 +230,21 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Send Reset Code (Resend)
+    builder
+      .addCase(sendResetCode.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(sendResetCode.fulfilled, (state) => {
+        state.isLoading = false
+        state.error = null
+      })
+      .addCase(sendResetCode.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload as string
       })

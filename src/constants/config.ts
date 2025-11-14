@@ -7,6 +7,8 @@ export const API_ENDPOINTS = {
   // Auth endpoints (public)
   REGISTER: '/auth/register',
   LOGIN: '/auth/login',
+  VERIFY_EMAIL: '/auth/verify-email',
+  RESEND_VERIFICATION_CODE: '/auth/resend-verification-code',
   FORGOT_PASSWORD: '/auth/forgot-password',
   SEND_RESET_CODE: '/auth/send-reset-code',
   RESET_PASSWORD: '/auth/reset-password',

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '@/hooks'
-import { login, forgotPassword, resetPassword, clearError } from '@/store/authSlice'
+import { login, forgotPassword, sendResetCode, resetPassword, clearError } from '@/store/authSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -88,6 +88,15 @@ export default function Login() {
       setShowOTPInput(false)
       setResetEmail('')
       alert(t('auth.passwordResetSuccess'))
+    }
+  }
+
+  const handleResendResetCode = async () => {
+    dispatch(clearError())
+    // Call backend API to resend password reset code
+    const result = await dispatch(sendResetCode(resetEmail))
+    if (sendResetCode.fulfilled.match(result)) {
+      alert(t('auth.codeSent'))
     }
   }
 
@@ -213,6 +222,16 @@ export default function Login() {
                   >
                     {t('auth.back')}
                   </Button>
+                </div>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleResendResetCode}
+                    className="text-sm underline"
+                    disabled={isLoading}
+                  >
+                    {t('auth.resendCode')}
+                  </button>
                 </div>
               </form>
             )}
