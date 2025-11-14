@@ -60,19 +60,19 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 max-w-md">
         {alerts.map((alert) => (
           <Alert
             key={alert.id}
             variant={alert.variant === 'success' || alert.variant === 'info' ? 'default' : alert.variant}
-            className="shadow-lg animate-in slide-in-from-top-5"
+            className="shadow-lg animate-in slide-in-from-top-5 pr-12"
           >
             {getIcon(alert.variant)}
             {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
             <AlertDescription>{alert.description}</AlertDescription>
             <button
               onClick={() => hideAlert(alert.id)}
-              className="absolute top-3 right-3 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
+              className="absolute top-3 right-3 rounded-sm opacity-70 hover:opacity-100 transition-opacity p-1"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
